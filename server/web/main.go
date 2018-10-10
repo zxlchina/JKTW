@@ -4,7 +4,8 @@ import "github.com/astaxie/beego"
 import "./controllers"
 
 func main(){
-    beego.SetStaticPath("/static","/home/lichzhang/code/JKTW/server/web/static/" )
+    static_path := beego.AppConfig.String("static_path")
+    beego.SetStaticPath("/static", static_path)
     beego.Router("/list", &controllers.ListController{})
     beego.Run()
 }
