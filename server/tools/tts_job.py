@@ -17,12 +17,26 @@ if __name__=='__main__':
     init_aip()
     init_db()
 
-    result = get_result("select title, cid, data from content_info where state = 1 and (voice_state is null or voice_state = 0) order by create_time desc limit 5")
+    result = get_result("select title, cid, data,voice_state from content_info where state = 1 and \
+            (voice_state is null or (voice_state != 1 and voice_state < 14)) order by create_time desc limit 5")
     
     for content in result:
         title = content[0]
         cid = content[1]
         data = get_text_from_html(content[2])
+        voice_state = 0
+        if content[3] is not None:
+            voice_state = int(content[3])
+
+        #先改写状态
+        sql = ""
+        if voice_state == 0:
+            sql = "update content_info set voice_state=10 where cid='%s'" % (cid)
+        else:
+            sql = "update content_info set voice_state=voice_state+1 where cid='%s'" % (cid)
+
+        print(sql) 
+        get_result(sql) 
 
         sentences = get_sentence(data)
         #print(sentences)
