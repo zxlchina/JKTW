@@ -13,6 +13,7 @@ import datetime
 from aip import AipSpeech
 from bs4 import BeautifulSoup
 import fcntl
+import configparser
 
 g_conn_inited = False
 
@@ -24,10 +25,22 @@ def init_db():
     if g_conn_inited == True:
         return 0
 
+    #读入配置文件
+    cf = configparser.ConfigParser()
+    cf.read("conf.conf")
+
+    chost = cf.get("db", "host")
+    cuser = cf.get("db", "user")
+    cpasswd = cf.get("db", "password")
+    cport = int(cf.get("db", "port"))
+    ccharset = cf.get("db", "charset")
+    cdbname = cf.get("db", "dbname")
+
+
     try:
         #g_conn = pymysql.connect(host='127.0.0.1', user='root', passwd='zxlchina', port=3306, charset='utf8')
-        g_conn = pymysql.connect(host='ai.lichzhang.net', user='writer', passwd='Zxl2010200889', port=3306, charset='utf8')
-        g_conn.select_db('jktw')
+        g_conn = pymysql.connect(host=chost, user=cuser, passwd=cpasswd, port=cport, charset=ccharset)
+        g_conn.select_db(cdbname)
 
         g_conn_inited = True
     except pymysql.Error as e:
