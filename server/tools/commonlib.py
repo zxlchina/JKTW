@@ -38,7 +38,6 @@ def init_db():
 
 
     try:
-        #g_conn = pymysql.connect(host='127.0.0.1', user='root', passwd='zxlchina', port=3306, charset='utf8')
         g_conn = pymysql.connect(host=chost, user=cuser, passwd=cpasswd, port=cport, charset=ccharset)
         g_conn.select_db(cdbname)
 
