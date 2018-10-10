@@ -3,6 +3,8 @@
 
 #killall chrome
 
-cd /home/lichzhang/code/JKTW/server/tools
-date >> content_log
-python3 ./cap_tt_content.py >> content_log
+logname="./log/content.log"
+
+cd /home/lichzhang/release/JKTW/server/tools
+date >> $logname
+python3 ./cap_tt_content.py >> $logname

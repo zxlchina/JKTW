@@ -3,8 +3,10 @@
 
 killall chrome
 
-cd /home/lichzhang/code/JKTW/server/tools
-date >> log
-python3 ./cap_tt.py >> log
-date >> log
-echo "####################################" >> log
+logname="./log/cap_tt.log"
+
+cd /home/lichzhang/release/JKTW/server/tools
+date >> $logname
+python3 ./cap_tt.py >> $logname
+date >> $logname
+echo "####################################" >> $logname

@@ -3,6 +3,8 @@
 
 #killall chrome
 
-cd /home/lichzhang/code/JKTW/server/tools
-date >> tts_log
-python3 ./tts_job.py >> tts_log
+logname="./log/tts.log"
+
+cd /home/lichzhang/release/JKTW/server/tools
+date >> $logname
+python3 ./tts_job.py >> $logname
