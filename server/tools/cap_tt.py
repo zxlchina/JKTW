@@ -146,18 +146,18 @@ if __name__=='__main__':
     driver.get(url)
     print("load cookie ...")
     load_cookie(driver)
-    driver.get(url)
-    print("wait for 3s ...")
-    time.sleep(3)
-    
+   
     #js="var q=document.documentElement.scrollTop=100000"
     #driver.execute_script(js)    
     #print (driver.page_source)
     #driver.save_screenshot('screen.png')
-    print(driver.title)
     
     try:
         for i in range(1):
+            driver.get(url)
+            print("wait for 3s ...")
+            time.sleep(3)
+     
             map_content = {}
             print("---------------------------------------")
             analysis(driver)
