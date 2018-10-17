@@ -11,6 +11,7 @@ import sys
 import time
 import datetime
 from aip import AipSpeech
+from aip import AipOcr
 from bs4 import BeautifulSoup
 import fcntl
 import configparser
@@ -119,16 +120,27 @@ def is_valid_date(date):
 
 def init_aip():
     global aip_client
+    global aip_client_ocr
 
     APP_ID = '11758766'
     API_KEY = 'I5yAyCHCEw5eQhjG0nuXkgHr'
     SECRET_KEY = '8OxzRjt1dMrRgtsmTHTLpH1SxWBywoju' 
 
     aip_client = AipSpeech(APP_ID, API_KEY, SECRET_KEY)
+
     #连接超时时间
     aip_client.setConnectionTimeoutInMillis(1000)
     #数据传输超时时间
     aip_client.setSocketTimeoutInMillis(3000)
+
+
+
+
+
+    APP_ID = '14462175'
+    API_KEY = 'KG8eaIU0ouFCaMLnQZ2u3IX1'
+    SECRET_KEY = 'waX99HpVyaukCX6aruuazGNo6zaVOcVu' 
+    aip_client_ocr = AipOcr(APP_ID, API_KEY, SECRET_KEY)
 
 
 def get_tts(data, out_file_name,spd = 5, pit = 5, vol = 5, per = 3):
@@ -146,6 +158,20 @@ def get_tts(data, out_file_name,spd = 5, pit = 5, vol = 5, per = 3):
         return False
     
     return True
+
+
+
+def get_file_content(filePath):
+    with open(filePath, 'rb') as fp:
+        return fp.read()
+
+def get_car_number(filename):
+    image = get_file_content(filename)
+    options = {}
+    options["multi_detect"] = "true"
+    res = aip_client_ocr.licensePlate(image, options) 
+
+    return res
 
 
 
