@@ -10,25 +10,44 @@ import pymysql
 import sys
 import time
 import datetime
+import base64
+import json
+import urllib
+import hashlib
+import requests
 from aip import AipSpeech
 from aip import AipOcr
 from bs4 import BeautifulSoup
 import fcntl
 import configparser
+import threading
 
 g_conn_inited = False
+g_sql_lock = threading.Lock()
 
 #初始化数据库
-def init_db():
+def init_db(conf_file="conf.conf"):
     global g_conn
     global g_conn_inited
 
     if g_conn_inited == True:
-        return 0
+        #ping一下db
+        need_init = False
+        try:
+            g_conn.ping(False)
+            #print("after ping")
+        except:
+            print("ping Error! need init")
+            need_init = True
+            
+        #不需要初始化
+        if not need_init:
+            #print ("do not need init")
+            return 0
 
     #读入配置文件
     cf = configparser.ConfigParser()
-    cf.read("conf.conf")
+    cf.read(conf_file)
 
     chost = cf.get("db", "host")
     cuser = cf.get("db", "user")
@@ -52,10 +71,14 @@ def init_db():
 def get_result(sql):
     global g_conn
     global g_conn_so
+    global g_sql_lock 
+
+    g_sql_lock.acquire() 
 
     ret = init_db()
     if ret != 0:
         print ("init db error %d" % ret)
+        g_sql_lock.release()
         return None
 
     try:
@@ -64,9 +87,13 @@ def get_result(sql):
         cur.execute(sql)
         g_conn.commit()
 
+        g_sql_lock.release()
+
         return cur
     except pymysql.Error as e:
         print ("MySql Error %d: %s" % (e.args[0], e.args[1]))
+
+        g_sql_lock.release()
         return None
 
 
@@ -165,6 +192,8 @@ def get_file_content(filePath):
     with open(filePath, 'rb') as fp:
         return fp.read()
 
+
+#得到图片中的车牌号，百度
 def get_car_number(filename):
     image = get_file_content(filename)
     options = {}
@@ -172,6 +201,60 @@ def get_car_number(filename):
     res = aip_client_ocr.licensePlate(image, options) 
 
     return res
+
+
+def get_sign(params):
+    uri_str = ""
+    for key in sorted(params.keys()):
+        if key == "app_key":
+            continue
+        uri_str += "%s=%s&" % (key, urllib.parse.quote(str(params[key]), safe = ""))
+    sign_str = uri_str + "app_key=" + params["app_key"]
+
+    hash_md5 = hashlib.md5(sign_str.encode())
+    return hash_md5.hexdigest().upper()
+ 
+
+#优图根据图片得到车牌号
+def get_car_number_by_youtu(img_url):
+    params = {}
+    url = "https://api.ai.qq.com/fcgi-bin/ocr/ocr_plateocr"
+    with open(img_url, "rb") as img_file:
+        image_data = img_file.read()
+
+    bs64 = base64.b64encode(image_data)
+    params["image"] = bs64.decode("utf-8")
+    params["app_id"] = 2109009601
+    params["app_key"] = "j3uUlfX3KWokWLe4"
+    #params["image_url"] = img_url
+    params["time_stamp"] = str(int(time.time()))
+    params["nonce_str"] = str(int(time.time()))
+    params["sign"] = get_sign(params)
+
+    data = ""
+    for key in params:
+        data += "%s=%s&" % (key, params[key])
+
+    response = requests.post(url, data=params) 
+    res = response.text
+
+    print(res)
+    
+    car_number_list = []
+    try:
+        data = json.loads(res)
+        if data["ret"] != 0:
+            print ("get car number error:" ,res)
+            return []
+
+        for item in data["data"]["item_list"]:
+            car_number_list.append(item["itemstring"])
+    except :
+        print("json exception")
+        return []
+
+    return car_number_list
+
 
 
 
