@@ -1,0 +1,25 @@
+
+数据库结构:
++--------------+---------------+------+-----+-------------------+-------+
+| Field        | Type          | Null | Key | Default           | Extra |
++--------------+---------------+------+-----+-------------------+-------+
+| cid          | varchar(100)  | NO   | PRI | NULL              |       |
+| title        | varchar(256)  | YES  |     | NULL              |       |
+| data         | longtext      | YES  |     | NULL              |       |
+| create_time  | datetime      | YES  |     | NULL              |       |
+| last_up_time | datetime      | YES  |     | CURRENT_TIMESTAMP |       |
+| state        | int(11)       | YES  |     | NULL              |       |
+| org_url      | varchar(1024) | YES  |     | NULL              |       |
+| head_img     | varchar(1024) | YES  |     | NULL              |       |
+| author       | varchar(256)  | YES  |     | NULL              |       |
+| author_url   | varchar(1024) | YES  |     | NULL              |       |
+| source       | varchar(20)   | YES  |     | NULL              |       |
+| import_time  | datetime      | YES  |     | NULL              |       |
+| voice_state  | int(11)       | YES  |     | NULL              |       |
+| sdata        | longtext      | YES  |     | NULL              |       |
++--------------+---------------+------+-----+-------------------+-------+
+
+
+state: 0 --- 已添加网址,待爬取;  1 ---  已爬取原始数据   ;    3  ----  爬取失败  ;
+voice_state:   1 ---- 成功 ;   10~13 ----  重试中;    14 --- 失败;
+
